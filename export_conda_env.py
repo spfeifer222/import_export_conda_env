@@ -125,6 +125,7 @@ def export_environment():
     )
     env_data = json.loads(result.stdout)
     explicit_deps = env_data.get("dependencies", [])
+    env_name = env_data.get("name", "exported_env")
 
     pip_packages = []
     conda_only = []
@@ -171,7 +172,7 @@ def export_environment():
         import yaml  # jetzt sicher verfügbar
 
         env = {
-            "name": "exported_env",
+            "name": env_name,
             "dependencies": []
         }
         env["dependencies"].extend(conda_only)
@@ -186,7 +187,11 @@ def export_environment():
     else:
         print(f"[INFO] Alle Pakete sind auf PyPI → Erstelle requirements.txt")
         output_path = Path("requirements.txt")
-        output_path.write_text("\n".join(pip_packages) + "\n", encoding="utf-8")
+        
+        # Kommentarzeile mit env_name hinzufügen
+        content = "# exported env {}\n".format(env_name)
+        content += "\n".join(pip_packages) + "\n"
+        output_path.write_text(content, encoding="utf-8")
         print(f"[SUCCESS] requirements.txt erstellt: {output_path.resolve()}")
 
 if __name__ == "__main__":
